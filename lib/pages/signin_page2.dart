@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:tapnassfluteer/backend.dart';
 
 class signin_page2 extends StatefulWidget {
   const signin_page2({Key? key, required this.isStudent}) : super(key: key);
@@ -14,27 +19,41 @@ class _signin_page2State extends State<signin_page2> {
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-        body: Center(
-            child: isSmallScreen
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      _Logo(),
-                      _FormContent(),
-                    ],
-                  )
-                : Container(
-                    padding: const EdgeInsets.all(32.0),
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Row(
-                      children: const [
-                        Expanded(child: _Logo()),
-                        Expanded(
-                          child: Center(child: _FormContent()),
+        resizeToAvoidBottomInset: false,
+        body: SingleChildScrollView(
+          child: Center(
+              child: isSmallScreen
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_rounded),
+                                onPressed: () {
+                                  Get.back();
+                                },
+                              )),
                         ),
+                        _Logo(),
+                        _FormContent(),
                       ],
-                    ),
-                  )));
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(32.0),
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: Row(
+                        children: const [
+                          Expanded(child: _Logo()),
+                          Expanded(
+                            child: Center(child: _FormContent()),
+                          ),
+                        ],
+                      ),
+                    )),
+        ));
   }
 }
 
@@ -174,10 +193,24 @@ class __FormContentState extends State<_FormContent> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    /// do something
+                onPressed: () async {
+                  // if (_formKey.currentState?.validate() ?? false) {
+                  //   /// do something
+                  // }
+
+                  var response = await http.post(
+                      Uri.parse(backend_url + "/student/log_in"),
+                      body: {"ST_ID": "441016616", "Password": "123456"});
+
+                  var jsonResult = json.decode(response.body);
+
+                  print(jsonResult["Message"]);
+                  if (response.statusCode == 200) {
+                    print(jsonResult["token"]);
                   }
+
+                  print(response.body);
+                  print(response.statusCode);
                 },
               ),
             ),
