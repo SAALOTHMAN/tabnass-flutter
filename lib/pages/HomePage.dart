@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
+import 'package:tapnassfluteer/pages/NFCReaderPage.dart';
+import 'package:tapnassfluteer/pages/schedule.dart';
 import 'package:tapnassfluteer/widgets/SubjectWidget.dart';
 import 'package:tapnassfluteer/widgets/bottom_bar.dart';
 
@@ -11,45 +14,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void navigateToSignInPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AttendancePage()),
-    );
+  String first_name = "";
+  String student_id = "";
+  int _selectedIndex = 1;
+  List<Widget> pages = [NFCReaderPage(), shcedule()];
+
+  FlutterSecureStorage storage = new FlutterSecureStorage();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    GetStudentData();
+  }
+
+  void GetStudentData() async {
+    first_name = await storage.read(key: "first_Name") as String;
+    student_id = await storage.read(key: "Student_ID") as String;
+    setState(() {
+      first_name;
+      student_id;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: kToolbarHeight + 0,
-          ), // Adjust the space beneath the app bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              'Schedule',
-              style: TextStyle(
-                fontSize: 24,
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          GestureDetector(
-            onTap: () {
-              navigateToSignInPage(context);
-            },
-            child: SubjectWidget(
-              subject: 'hello',
-              section: 'hello',
-              time: '11:00',
-              day: 'monday',
-            ),
-          ),
-        ],
-      ),
+      body: pages[_selectedIndex],
       appBar: AppBar(
         backgroundColor: Colors.blue[900], // Set the app bar color to dark blue
         title: Row(
@@ -59,12 +50,12 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'الاسم',
+                  '$first_name',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
                 SizedBox(height: 5),
                 Text(
-                  'ID',
+                  '$student_id',
                   style: TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ],
@@ -73,9 +64,26 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: 92,
-        child: bottom_bar(),
-      ),
+          height: 92,
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.document_scanner_outlined),
+                label: 'Scan',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_month_outlined),
+                label: 'Schedule',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.blue,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          )),
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:tapnassfluteer/backend.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:tapnassfluteer/pages/HomePage.dart';
+import 'package:tapnassfluteer/util/http_utilities.dart';
 
 class signin_page2 extends StatefulWidget {
   const signin_page2({Key? key, required this.isStudent}) : super(key: key);
@@ -45,7 +47,7 @@ class _signin_page2State extends State<signin_page2> {
                       padding: const EdgeInsets.all(32.0),
                       constraints: const BoxConstraints(maxWidth: 800),
                       child: Row(
-                        children: const [
+                        children: [
                           Expanded(child: _Logo()),
                           Expanded(
                             child: Center(child: _FormContent()),
@@ -75,7 +77,7 @@ class _Logo extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: Text(
-            "Sign In using your academic ID and password",
+            "تسجيل دخول",
             textAlign: TextAlign.center,
             style: isSmallScreen
                 ? Theme.of(context).textTheme.headlineSmall
@@ -100,6 +102,9 @@ class _FormContent extends StatefulWidget {
 class __FormContentState extends State<_FormContent> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
+  Map<String, String> form = {"ST_ID": "", "Password": ""};
+  String errorMessage = "";
+  FlutterSecureStorage storage = new FlutterSecureStorage();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -114,18 +119,19 @@ class __FormContentState extends State<_FormContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextFormField(
+              onChanged: (value) {
+                form["ST_ID"] = value;
+              },
               validator: (value) {
                 // add email validation
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
                 }
 
-                bool emailValid =
-                    RegExp(r"^.!#$%&'*+-/=?^_`{|}~]+@+\.[a-zA-Z]+")
-                        .hasMatch(value);
-                if (!emailValid) {
+                if (value.length != 9) {
                   return 'Please enter a valid ID';
                 }
+
                 return null;
               },
               decoration: const InputDecoration(
@@ -137,6 +143,9 @@ class __FormContentState extends State<_FormContent> {
             ),
             _gap(),
             TextFormField(
+              onChanged: (value) {
+                form["Password"] = value;
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -164,20 +173,13 @@ class __FormContentState extends State<_FormContent> {
                     },
                   )),
             ),
-            _gap(),
-            CheckboxListTile(
-              value: _rememberMe,
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  _rememberMe = value;
-                });
-              },
-              title: const Text('Remember me'),
-              controlAffinity: ListTileControlAffinity.leading,
-              dense: true,
-              contentPadding: const EdgeInsets.all(0),
+            Center(
+              child: Text(
+                errorMessage,
+                style: TextStyle(color: Colors.red),
+              ),
             ),
+            _gap(),
             _gap(),
             SizedBox(
               width: double.infinity,
@@ -189,28 +191,33 @@ class __FormContentState extends State<_FormContent> {
                 child: const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
-                    'Sign in',
+                    'تسجيل دخول',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 onPressed: () async {
-                  // if (_formKey.currentState?.validate() ?? false) {
-                  //   /// do something
-                  // }
+                  if (_formKey.currentState?.validate() ?? false) {
+                    Map<dynamic, dynamic> result =
+                        await http_functions.HttpPost("/student/log_in", form);
 
-                  var response = await http.post(
-                      Uri.parse(backend_url + "/student/log_in"),
-                      body: {"ST_ID": "441016616", "Password": "123456"});
+                    Map<String, dynamic> result_json = result["response"];
 
-                  var jsonResult = json.decode(response.body);
+                    if (result["statusCode"] == 200) {
+                      storage.write(key: "token", value: result_json["token"]);
+                      storage.write(
+                          key: "first_Name", value: result_json["first_Name"]);
+                      storage.write(
+                          key: "last_Name", value: result_json["last_Name"]);
+                      storage.write(
+                          key: "Student_ID", value: result_json["Student_ID"]);
 
-                  print(jsonResult["Message"]);
-                  if (response.statusCode == 200) {
-                    print(jsonResult["token"]);
+                      Get.offAll(HomePage());
+                    } else {
+                      setState(() {
+                        errorMessage = result_json["Message"];
+                      });
+                    }
                   }
-
-                  print(response.body);
-                  print(response.statusCode);
                 },
               ),
             ),
