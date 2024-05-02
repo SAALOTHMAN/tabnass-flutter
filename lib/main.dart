@@ -7,6 +7,7 @@ import 'package:tapnassfluteer/pages/signin_page1.dart';
 void main() {
   runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(fontFamily: 'IBMPlexSansArabic'),
     home: signin_page1(),
   ));
 }
