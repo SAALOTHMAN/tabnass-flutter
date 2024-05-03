@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
@@ -26,18 +27,29 @@ class _shceduleState extends State<shcedule> {
   }
 
   void GetAllSubjects() async {
-    var Response =
-        await http_functions.HttpLoginRequired("/student/Home", {}, true);
+    FlutterSecureStorage storage = new FlutterSecureStorage();
+
+    bool IsStudent = (await storage.read(key: "isStudent")) == "true";
+
+    var Response = IsStudent
+        ? await http_functions.HttpLoginRequired("/student/Home", {}, true)
+        : await http_functions.HttpLoginRequired("/Educator/Home", {}, true);
 
     var Response_json = Response["response"];
 
     subjects = [];
     for (var element in Response_json) {
-      subjects.add({
-        "section_id": element["Section"]["SEC_ID"],
-        "course_Name": element["Section"]["Course"]["Course_Name"],
-        "course_ID": element["Section"]["Course"]["Course_ID"]
-      });
+      IsStudent
+          ? subjects.add({
+              "section_id": element["Section"]["SEC_ID"],
+              "course_Name": element["Section"]["Course"]["Course_Name"],
+              "course_ID": element["Section"]["Course"]["Course_ID"]
+            })
+          : subjects.add({
+              "section_id": element["SEC_ID"],
+              "course_Name": element["Course"]["Course_Name"],
+              "course_ID": element["Course"]["Course_ID"]
+            });
     }
 
     setState(() {

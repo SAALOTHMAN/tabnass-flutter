@@ -17,7 +17,6 @@ class signin_page2 extends StatefulWidget {
 class _signin_page2State extends State<signin_page2> {
   @override
   Widget build(BuildContext context) {
-    print(widget.isStudent);
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
@@ -40,7 +39,9 @@ class _signin_page2State extends State<signin_page2> {
                               )),
                         ),
                         _Logo(),
-                        _FormContent(),
+                        _FormContent(
+                          isStudent: widget.isStudent,
+                        ),
                       ],
                     )
                   : Container(
@@ -50,7 +51,10 @@ class _signin_page2State extends State<signin_page2> {
                         children: [
                           Expanded(child: _Logo()),
                           Expanded(
-                            child: Center(child: _FormContent()),
+                            child: Center(
+                                child: _FormContent(
+                              isStudent: widget.isStudent,
+                            )),
                           ),
                         ],
                       ),
@@ -93,8 +97,9 @@ class _Logo extends StatelessWidget {
 }
 
 class _FormContent extends StatefulWidget {
-  const _FormContent({Key? key}) : super(key: key);
+  const _FormContent({Key? key, required this.isStudent}) : super(key: key);
 
+  final bool isStudent;
   @override
   State<_FormContent> createState() => __FormContentState();
 }
@@ -102,8 +107,9 @@ class _FormContent extends StatefulWidget {
 class __FormContentState extends State<_FormContent> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
-  Map<String, String> form = {"ST_ID": "", "Password": ""};
+  Map<String, String> form = {"ID": "", "Password": ""};
   String errorMessage = "";
+
   FlutterSecureStorage storage = new FlutterSecureStorage();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -120,7 +126,7 @@ class __FormContentState extends State<_FormContent> {
           children: [
             TextFormField(
               onChanged: (value) {
-                form["ST_ID"] = value;
+                form["ID"] = value;
               },
               validator: (value) {
                 // add email validation
@@ -128,10 +134,9 @@ class __FormContentState extends State<_FormContent> {
                   return 'Please enter some text';
                 }
 
-                if (value.length != 9) {
+                if (widget.isStudent && value.length != 9) {
                   return 'Please enter a valid ID';
                 }
-
                 return null;
               },
               decoration: const InputDecoration(
@@ -197,8 +202,10 @@ class __FormContentState extends State<_FormContent> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-                    Map<dynamic, dynamic> result =
-                        await http_functions.HttpPost("/student/log_in", form);
+                    Map<dynamic, dynamic> result = widget.isStudent
+                        ? await http_functions.HttpPost("/student/log_in", form)
+                        : await http_functions.HttpPost(
+                            "/Educator/log_in", form);
 
                     Map<String, dynamic> result_json = result["response"];
 
@@ -208,8 +215,15 @@ class __FormContentState extends State<_FormContent> {
                           key: "first_Name", value: result_json["first_Name"]);
                       storage.write(
                           key: "last_Name", value: result_json["last_Name"]);
+
+                      widget.isStudent
+                          ? storage.write(
+                              key: "ID", value: result_json["Student_ID"])
+                          : storage.write(
+                              key: "ID", value: result_json["Educator_ID"]);
+
                       storage.write(
-                          key: "Student_ID", value: result_json["Student_ID"]);
+                          key: "isStudent", value: widget.isStudent.toString());
 
                       Get.offAll(HomePage());
                     } else {
