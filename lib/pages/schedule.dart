@@ -43,12 +43,10 @@ class _shceduleState extends State<shcedule> {
           ? subjects.add({
               "section_id": element["Section"]["SEC_ID"],
               "course_Name": element["Section"]["Course"]["Course_Name"],
-              "course_ID": element["Section"]["Course"]["Course_ID"]
             })
           : subjects.add({
               "section_id": element["SEC_ID"],
               "course_Name": element["Course"]["Course_Name"],
-              "course_ID": element["Course"]["Course_ID"]
             });
     }
 
@@ -85,8 +83,8 @@ class _shceduleState extends State<shcedule> {
               ...subjects
                   .map(
                     (e) => SubjectWidget(
-                      subject: e["course_Name"] as String,
-                      section: e["course_ID"] as String,
+                      courseName: e["course_Name"] as String,
+                      sectionId: e["section_id"] as String,
                     ),
                   )
                   .toList()

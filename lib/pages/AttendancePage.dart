@@ -1,55 +1,148 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:tapnassfluteer/pages/HomePage.dart';
-import 'package:tapnassfluteer/widgets/AttendanceWidget.dart';
+import 'dart:collection';
 
-class AttendancePage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
+import 'package:tapnassfluteer/globelVariables.dart';
+import 'package:tapnassfluteer/pages/HomePage.dart';
+import 'package:tapnassfluteer/util/http_utilities.dart';
+import 'package:tapnassfluteer/widgets/AttendanceWidget.dart';
+import 'package:tapnassfluteer/widgets/attendanceRecordWidget.dart';
+
+class AttendancePage extends StatefulWidget {
+  AttendancePage({super.key, required this.sectionId});
+  final String sectionId;
+
+  @override
+  State<AttendancePage> createState() => _AttendancePageState();
+}
+
+class _AttendancePageState extends State<AttendancePage> {
+  late List<Map<String, dynamic>> AttendanceRecords;
+  late List<attendanceRecordWidget> FilteredAttendanceRecords;
+  String selected = "أختر الحالة";
+  bool _loading = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    GetAttendanceRecord();
+  }
+
+  void GetAttendanceRecord() async {
+    var response = await http_functions.HttpLoginRequired(
+        "/student/Course/${widget.sectionId}", {}, true);
+
+    List response_json = response["response"];
+    this.AttendanceRecords = response_json
+        .map(
+          (e) => {
+            "status": e["Status"],
+            "time": e["Time"],
+            "date": e["date"],
+            "day": e["Lecture"]["day"],
+          },
+        )
+        .toList();
+
+    FilteredAttendanceRecords =
+        AttendanceRecords.map((e) => attendanceRecordWidget(
+              status: e["status"],
+              time: e["time"],
+              date: e["date"],
+              day: e["day"],
+            )).toList();
+
+    setState(() {
+      _loading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900], // Set the app bar color to dark blue
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Get.to(HomePage());
-              },
-              child: Padding(
-                padding: EdgeInsets.only(right: 16),
-                child: Text(
-                  'رجوع',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Attendance History',
-              style: TextStyle(
-                fontSize: 20,
+        child: _loading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DropdownButton<String>(
+                          value: selected,
+                          items: <String>[
+                            'أختر الحالة',
+                            'حاضر',
+                            'غائب',
+                            'متأخر',
+                          ].map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selected = newValue as String;
+                              if (selected == "أختر الحالة") {
+                                FilteredAttendanceRecords =
+                                    AttendanceRecords.map(
+                                        (e) => attendanceRecordWidget(
+                                              status: e["status"],
+                                              time: e["time"],
+                                              date: e["date"],
+                                              day: e["day"],
+                                            )).toList();
+
+                                return;
+                              }
+
+                              FilteredAttendanceRecords =
+                                  AttendanceRecords.where((element) {
+                                return element["status"] == selected;
+                              })
+                                      .toList()
+                                      .map((e) => attendanceRecordWidget(
+                                            status: e["status"],
+                                            time: e["time"],
+                                            date: e["date"],
+                                            day: e["day"],
+                                          ))
+                                      .toList();
+                              ;
+                            });
+                          },
+                          hint: Text(
+                            "اختر الحالة",
+                            style: TextStyle(
+                                color: prandColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Text(
+                          'سجل الحضور',
+                          style: TextStyle(fontSize: 20, color: prandColor),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 22),
+                    ...this.FilteredAttendanceRecords
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 16),
-            AttendanceWidget(
-              dateTime: DateTime.now().subtract(Duration(days: 1)),
-              attendanceStatus: 'Present',
-            ),
-            SizedBox(height: 16),
-            AttendanceWidget(
-              dateTime: DateTime.now().subtract(Duration(days: 2)),
-              attendanceStatus: 'Absent',
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -4,21 +4,22 @@ import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
 
 class SubjectWidget extends StatelessWidget {
-  final String subject;
-  final String section;
+  final String courseName;
+  final String sectionId;
 
   const SubjectWidget({
     Key? key,
-    required this.subject,
-    required this.section,
+    required this.courseName,
+    required this.sectionId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).size.width);
     return GestureDetector(
       onTap: () {
-        Get.to(AttendancePage());
+        Get.to(AttendancePage(
+          sectionId: this.sectionId,
+        ));
       },
       child: Center(
         child: Container(
@@ -38,17 +39,17 @@ class SubjectWidget extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          subject,
+                          courseName,
                           style: TextStyle(
                               color: Colors.grey,
-                              fontSize: ( 14/ 392) *
+                              fontSize: (14 / 392) *
                                   MediaQuery.of(context).size.width),
                         ),
                         Text(
                           ' :المادة',
                           style: TextStyle(
                               color: prandColor,
-                              fontSize: (17/392) *
+                              fontSize: (17 / 392) *
                                   MediaQuery.of(context).size.width),
                         ),
                         Padding(
@@ -65,25 +66,25 @@ class SubjectWidget extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          section,
+                          sectionId,
                           style: TextStyle(
                               color: Colors.grey,
-                              fontSize: (14/392) *
+                              fontSize: (14 / 392) *
                                   MediaQuery.of(context).size.width),
                         ),
                         Text(
                           ' :الشعبة',
                           style: TextStyle(
                               color: prandColor,
-                              fontSize: (17/392) *
+                              fontSize: (17 / 392) *
                                   MediaQuery.of(context).size.width),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 4),
                           child: Icon(
-                              Icons.people_outline_rounded,
-                              color: prandColor,
-                              ),
+                            Icons.people_outline_rounded,
+                            color: prandColor,
+                          ),
                         ),
                       ],
                     ),

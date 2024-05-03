@@ -131,17 +131,17 @@ class __FormContentState extends State<_FormContent> {
               validator: (value) {
                 // add email validation
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'الرجاء ادخال الرقم';
                 }
 
                 if (widget.isStudent && value.length != 9) {
-                  return 'Please enter a valid ID';
+                  return 'الرجاء ادخال رقم صحيح';
                 }
                 return null;
               },
               decoration: const InputDecoration(
                 labelText: 'ID',
-                hintText: 'Enter your ID',
+                hintText: 'ادخل الرقم الجامعي',
                 prefixIcon: Icon(Icons.perm_identity_rounded),
                 border: OutlineInputBorder(),
               ),
@@ -153,18 +153,18 @@ class __FormContentState extends State<_FormContent> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'الرجاء ادخال الرقم السري';
                 }
 
                 if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
+                  return 'يجب ان يحتوي على 6 احرف على الاقل';
                 }
                 return null;
               },
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
                   labelText: 'Password',
-                  hintText: 'Enter your password',
+                  hintText: 'أدخل كلمة السر',
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
