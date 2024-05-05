@@ -24,6 +24,7 @@ class _shceduleState extends State<shcedule> {
     // TODO: implement initState
     super.initState();
     GetAllSubjects();
+    
   }
 
   void GetAllSubjects() async {

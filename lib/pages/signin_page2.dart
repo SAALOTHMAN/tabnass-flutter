@@ -212,9 +212,7 @@ class __FormContentState extends State<_FormContent> {
                     if (result["statusCode"] == 200) {
                       storage.write(key: "token", value: result_json["token"]);
                       storage.write(
-                          key: "first_Name", value: result_json["first_Name"]);
-                      storage.write(
-                          key: "last_Name", value: result_json["last_Name"]);
+                          key: "full_name", value: "${result_json["first_Name"]} ${result_json["last_Name"]}");
 
                       widget.isStudent
                           ? storage.write(

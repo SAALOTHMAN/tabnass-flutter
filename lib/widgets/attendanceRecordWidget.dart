@@ -72,6 +72,74 @@ class attendanceRecordWidget extends StatelessWidget {
   }
 }
 
+class attendanceRecordLactureWidget extends StatelessWidget {
+  const attendanceRecordLactureWidget(
+      {super.key,
+      required this.status,
+      required this.time,
+      required this.fullName,
+      required this.ID});
+
+  final String status;
+  final String fullName;
+  final String ID;
+  final String time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.95,
+        padding: EdgeInsets.all(12),
+        margin: EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Color(0xffF4F4F4),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  child: attendanceElement(
+                      title: ' :الحالة',
+                      icon: Icons.people_outline_rounded,
+                      content: status),
+                ),
+                Container(
+                  child: attendanceElement(
+                      title: ' :الوقت',
+                      icon: Icons.access_time_sharp,
+                      content: time),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  child: attendanceElement(
+                      title: ' :الأسم', icon: Icons.person, content: fullName),
+                ),
+                Container(
+                  child: attendanceElement(
+                      title: ' :ID',
+                      icon: Icons.domain_verification_sharp,
+                      content: ID),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class attendanceElement extends StatefulWidget {
   const attendanceElement(
       {super.key,

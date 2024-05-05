@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void GetStudentData() async {
-    first_name = await storage.read(key: "first_Name") as String;
+    first_name = await storage.read(key: "full_name") as String;
     ID = await storage.read(key: "ID") as String;
     setState(() {
       first_name;
