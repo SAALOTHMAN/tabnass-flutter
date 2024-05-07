@@ -1,7 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:ndef/ndef.dart';
+import 'package:ndef/utilities.dart';
+import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/HomePage.dart';
+import 'package:tapnassfluteer/util/loading.dart';
 
 class NFCReaderPage extends StatefulWidget {
   @override
@@ -14,18 +21,34 @@ class _NFCReaderPageState extends State<NFCReaderPage> {
   Future<void> startNFCScan() async {
     try {
       var tag = await FlutterNfcKit.poll(
-          timeout: Duration(seconds: 10),
+          timeout: Duration(minutes: 12),
           iosAlertMessage:
               "Hold your iPhone near the item to learn more about it.");
+
       var ndefRecords = await FlutterNfcKit.readNDEFRecords();
-      setState(() {
-        _nfcData = ndefRecords.map((record) => record.payload).join(', ');
-      });
+
+      loadingDialog();
+
+      NDEFRecord record = ndefRecords.first;
+
+      Map<String, dynamic> data = json
+          .decode(String.fromCharCodes(record.payload!.toList().sublist(3)));
+      print(data);
+
       // Here you can send _nfcData to your backend
     } catch (e) {
-      setState(() {
-        _nfcData = "Failed to read NFC tag: $e";
-      });
+      Get.back();
+      print(e);
+      Get.defaultDialog(
+          title: "خطأ",
+          content: Container(
+            child: Text(
+              "حدث خطأ ما , الرجاء المحاولة لاحقا",
+              style: TextStyle(fontSize: 20),
+            ),
+          ));
+
+      startNFCScan();
     }
   }
 
@@ -34,13 +57,20 @@ class _NFCReaderPageState extends State<NFCReaderPage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    startNFCScan();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('مسح بطاقة NFC', style: TextStyle(color: Colors.white)),
+        title: Text('مسح بطاقة NFC', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         actions: [
           Padding(
@@ -71,17 +101,6 @@ class _NFCReaderPageState extends State<NFCReaderPage> {
             ),
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                // Background color
-                ),
-            onPressed: startNFCScan,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 35.0, vertical: 20.0),
-              child: Text('دوس للتأكيد', style: TextStyle(fontSize: 20)),
-            ),
-          ),
         ],
       ),
     );

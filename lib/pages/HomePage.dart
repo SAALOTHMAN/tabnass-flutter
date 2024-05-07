@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
 import 'package:tapnassfluteer/pages/NFCReaderPage.dart';
 import 'package:tapnassfluteer/pages/schedule.dart';
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                 ]);
           },
         ),
-        backgroundColor: Colors.blue[900], // Set the app bar color to dark blue
+        backgroundColor: prandColor, // Set the app bar color to dark blue
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

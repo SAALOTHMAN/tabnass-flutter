@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
@@ -24,7 +25,6 @@ class _shceduleState extends State<shcedule> {
     // TODO: implement initState
     super.initState();
     GetAllSubjects();
-    
   }
 
   void GetAllSubjects() async {
@@ -57,9 +57,18 @@ class _shceduleState extends State<shcedule> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _loading
-        ? Center(child: CircularProgressIndicator())
+        ? Center(
+            child: SpinKitCubeGrid(
+            color: prandColor,
+          ))
         : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

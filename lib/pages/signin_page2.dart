@@ -6,6 +6,7 @@ import 'package:tapnassfluteer/backend.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tapnassfluteer/pages/HomePage.dart';
 import 'package:tapnassfluteer/util/http_utilities.dart';
+import 'package:tapnassfluteer/util/loading.dart';
 
 class signin_page2 extends StatefulWidget {
   const signin_page2({Key? key, required this.isStudent}) : super(key: key);
@@ -202,6 +203,8 @@ class __FormContentState extends State<_FormContent> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
+                    loadingDialog();
+
                     Map<dynamic, dynamic> result = widget.isStudent
                         ? await http_functions.HttpPost("/student/log_in", form)
                         : await http_functions.HttpPost(
@@ -209,10 +212,13 @@ class __FormContentState extends State<_FormContent> {
 
                     Map<String, dynamic> result_json = result["response"];
 
+                    Get.back();
                     if (result["statusCode"] == 200) {
                       storage.write(key: "token", value: result_json["token"]);
                       storage.write(
-                          key: "full_name", value: "${result_json["first_Name"]} ${result_json["last_Name"]}");
+                          key: "full_name",
+                          value:
+                              "${result_json["first_Name"]} ${result_json["last_Name"]}");
 
                       widget.isStudent
                           ? storage.write(
