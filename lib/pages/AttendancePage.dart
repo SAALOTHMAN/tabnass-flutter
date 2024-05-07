@@ -45,6 +45,7 @@ class _AttendancePageState extends State<AttendancePage> {
         "${response["response"]["Educator"]["Educator"]["F_Name"]} ${response["response"]["Educator"]["Educator"]["L_Name"]}";
     Educator["location"] =
         response["response"]["Educator"]["Educator"]["Room_Number"];
+    Educator["status"] = response["response"]["Educator"]["Educator"]["Status"];
     this.AttendanceRecords = response_json
         .map(
           (e) => {
@@ -54,6 +55,8 @@ class _AttendancePageState extends State<AttendancePage> {
             "day": e["Lecture"]["day"],
           },
         )
+        .toList()
+        .reversed
         .toList();
 
     FilteredAttendanceRecords =
@@ -90,6 +93,10 @@ class _AttendancePageState extends State<AttendancePage> {
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: ListTile(
+                        trailing: Text(
+                          Educator["status"],
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
                         contentPadding: EdgeInsets.all(13),
                         shape: RoundedRectangleBorder(
                             borderRadius:

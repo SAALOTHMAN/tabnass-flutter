@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:tapnassfluteer/globelVariables.dart';
 import 'package:tapnassfluteer/pages/AttendancePage.dart';
 import 'package:tapnassfluteer/pages/NFCReaderPage.dart';
 import 'package:tapnassfluteer/pages/schedule.dart';
 import 'package:tapnassfluteer/pages/signin_page1.dart';
+import 'package:tapnassfluteer/util/http_utilities.dart';
 import 'package:tapnassfluteer/widgets/SubjectWidget.dart';
 import 'package:tapnassfluteer/widgets/bottom_bar.dart';
 
@@ -21,6 +23,9 @@ class _HomePageState extends State<HomePage> {
   String ID = "";
   int _selectedIndex = 1;
   List<Widget> pages = [NFCReaderPage(), shcedule()];
+  late bool isStudent;
+  late String SelectedStatus;
+  bool _loading = true;
 
   FlutterSecureStorage storage = new FlutterSecureStorage();
 
@@ -32,18 +37,35 @@ class _HomePageState extends State<HomePage> {
   }
 
   void GetStudentData() async {
+    isStudent = (await storage.read(key: "isStudent")) == "true";
+
     first_name = await storage.read(key: "full_name") as String;
     ID = await storage.read(key: "ID") as String;
+
+    if (!isStudent) {
+      SelectedStatus = await storage.read(key: "status") as String;
+      setState(() {
+        SelectedStatus;
+      });
+    }
     setState(() {
       first_name;
       ID;
     });
+
+    _loading = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[_selectedIndex],
+      backgroundColor: Colors.white,
+      body: _loading
+          ? Center(
+              child: SpinKitCubeGrid(
+              color: prandColor,
+            ))
+          : pages[_selectedIndex],
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(
@@ -86,6 +108,47 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            _loading
+                ? Center(
+                    child: SpinKitCubeGrid(
+                    color: prandColor,
+                  ))
+                : (!isStudent)
+                    ? DropdownButton<String>(
+                        dropdownColor: prandColor,
+                        value: SelectedStatus,
+                        items: ["متاح", "مشغول"]
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            SelectedStatus = newValue as String;
+                          });
+
+                          http_functions.HttpLoginRequired(
+                              "/Educator/Change_Status",
+                              {"Status": SelectedStatus},
+                              false);
+                        },
+                        hint: Text(
+                          "اختر التاريخ",
+                          style: TextStyle(
+                              color: prandColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      )
+                    : Container(),
+            SizedBox(
+              width: 13,
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

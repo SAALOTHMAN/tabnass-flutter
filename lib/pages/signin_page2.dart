@@ -228,7 +228,11 @@ class __FormContentState extends State<_FormContent> {
 
                       storage.write(
                           key: "isStudent", value: widget.isStudent.toString());
-
+                      
+                      if(!widget.isStudent)
+                      storage.write(
+                          key: "status", value: result_json["Educator_Status"]);
+                      
                       Get.offAll(HomePage());
                     } else {
                       setState(() {

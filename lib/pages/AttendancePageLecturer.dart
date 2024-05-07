@@ -63,6 +63,8 @@ class _AttendancePageLecturerState extends State<AttendancePageLecturer> {
               ' ${element["Student"]["F_Name"]}  ${element["Student"]["L_Name"]}',
           "ID": element["Student"]["ST_ID"],
           "time": element["Time"],
+          "date": element["date"],
+          "lec_id": element["Lecture"]["LEC_ID"]
         });
       }
       _records_loading = false;
@@ -127,6 +129,8 @@ class _AttendancePageLecturerState extends State<AttendancePageLecturer> {
                               ...records
                                   .map(
                                     (e) => attendanceRecordLactureWidget(
+                                        date: e["date"] as String,
+                                        lec_id: e["lec_id"] as String,
                                         status: e["status"] as String,
                                         time: e["time"] as String,
                                         fullName: e["full_name"] as String,

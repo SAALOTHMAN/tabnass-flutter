@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tapnassfluteer/globelVariables.dart';
+import 'package:tapnassfluteer/util/http_utilities.dart';
 
 class attendanceRecordWidget extends StatelessWidget {
   const attendanceRecordWidget(
@@ -78,12 +79,17 @@ class attendanceRecordLactureWidget extends StatelessWidget {
       required this.status,
       required this.time,
       required this.fullName,
-      required this.ID});
+      required this.ID,
+      required this.date,
+      required this.lec_id});
 
   final String status;
   final String fullName;
   final String ID;
   final String time;
+
+  final String date;
+  final String lec_id;
 
   @override
   Widget build(BuildContext context) {
@@ -102,10 +108,29 @@ class attendanceRecordLactureWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  child: attendanceElement(
-                      title: ' :الحالة',
-                      icon: Icons.people_outline_rounded,
-                      content: status),
+                  child: DropdownButton<String>(
+                    value: status,
+                    items: <String>[
+                      'حاضر',
+                      'غائب',
+                      'متأخر',
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      print(lec_id);
+                      print(date);
+                      print(ID);
+
+                      http_functions.HttpLoginRequired(
+                          "/Educator/Change_Student_Status/$lec_id/$ID",
+                          {"Status": newValue as String, "date": date},
+                          false);
+                    },
+                  ),
                 ),
                 Container(
                   child: attendanceElement(
